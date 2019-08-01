@@ -1,4 +1,5 @@
 import os
+import datetime
 #OUTPUTPATH = '/var/samba/gas/'
 #LOGPATH = '/var/samba/gas/'
 OUTPUTPATH = './data/'
@@ -32,6 +33,8 @@ is_valid_month = lambda x: 1 <= x <= 12
 quartal = lambda x: None if not is_valid_month(x) else int((x + 2) / 3)
 season = lambda x: None if not is_valid_month(x) else 2 if x in (1, 2, 3, 11, 12) else 1 if x in (4, 5, 9, 10) else 0
 winter = lambda x: None if not is_valid_month(x) else 1 if not x in (4, 5, 6, 7, 8, 9) else 0
-
-
-
+month = lambda x: x.month
+dateFromInt = lambda x:  None if x < 20000101 or x > 99990101 else datetime.date(int(str(x)[0:4]), int(str(x)[4:6]), int(str(x)[6:8]))
+dateToInt = lambda x: x.year * 10000 + x.month * 100 + x.day
+# excel like Sunday: 1 ... Saturday: 7
+weekday = lambda x: (x.weekday() + 1) % 7 + 1

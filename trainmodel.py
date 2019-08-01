@@ -7,6 +7,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 
+
 if __name__ == '__main__':
     log = logger.Logger()
 
@@ -19,24 +20,31 @@ if __name__ == '__main__':
 
     # during training data will be divided: 80% for training 20% for testing
     train_data = pd.read_csv('DAT_TEMP_RLM_SLP_KORR.csv', sep=";", decimal=",", thousands='.',
-                             parse_dates=['DAT'], index_col=['DAT'])[-(365+365):]
-    
-    # build additional features
+                             parse_dates=['DAT'], dayfirst=True, index_col=['DAT'])[-(+365+365):]
+
+    train_data['WT'] = train_data.index.to_series().apply(gasprognoseConstants.weekday)
+    train_data['MONAT'] = train_data.index.to_series().apply(gasprognoseConstants.month)
     train_data['SEASON'] = train_data['MONAT'].apply(gasprognoseConstants.season)
     train_data['QUARTAL'] = train_data['MONAT'].apply(gasprognoseConstants.quartal)
     train_data['WINTER'] = train_data['MONAT'].apply(gasprognoseConstants.winter)
 
+
+
+
+    #train_data = pd.read_csv('DAT_TEMP_EV_STUNDE.csv', sep=";", decimal=",", thousands='.', parse_dates=['DAT'])[-365*24:]
+    #train_data = train_data.groupby('DATH4').mean()
+    #train_data['RLMEEFW'] = train_data['RLMEEFW'] * 4
     # define the columns that you want to use as features for training AND prediction
     # a json file with the limits is written
     features = dict()
     features['TEMP'] = {'column': 'TEMP'}
     features['TEMPGL'] = {'column': 'TEMPGL'}
     features['WT'] = {'column': 'WT'}
-    features['WINTER'] = {'column': 'WINTER'}
+    features['WINTER'] = {'column': 'WINTER'} # ??
     features['SEASON'] = {'column': 'SEASON'}
     features['MONAT'] = {'column': 'MONAT'}
     features['QUARTAL'] = {'column': 'QUARTAL'}
-
+    # define the model and the label
     rlmmodel = PrognoseBase(gasprognoseConstants.RLMMODEL, 'RLMKORREE')
     if dotraining:
         testdata = rlmmodel.trainmodel(train_data, features, showhistory=False)
@@ -44,7 +52,7 @@ if __name__ == '__main__':
     data = train_data[-365:]
     stat = rlmmodel.compare(data, showplot=True)
     stat['T'] = data['TEMP'].values
-    sns.pairplot(stat[['Y', 'D', 'A']], diag_kind="kde")
+    sns.pairplot(stat[['T', 'Y', 'D', 'A']], diag_kind="kde")
     plt.show()
 
     exit(0)
